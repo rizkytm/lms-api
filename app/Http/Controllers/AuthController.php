@@ -30,6 +30,7 @@ class AuthController extends Controller
         $user->password = bcrypt(request()->password);
         $user->save();
 
+        // TODO: move to separate function
         $credentials = request(['email', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {
