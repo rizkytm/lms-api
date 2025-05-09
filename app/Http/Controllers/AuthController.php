@@ -29,8 +29,15 @@ class AuthController extends Controller
         $user->email = request()->email;
         $user->password = bcrypt(request()->password);
         $user->save();
-  
-        return response()->json($user, 201);
+
+        $credentials = request(['email', 'password']);
+
+        if (! $token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // return response()->json($user, 201);
+        return $this->respondWithToken($token, true);
     }
   
   
@@ -47,7 +54,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
   
-        return $this->respondWithToken($token);
+        return $this->respondWithToken($token, true);
     }
   
     /**
@@ -89,12 +96,18 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token)
+    protected function respondWithToken($token, $with_user = false)
     {
-        return response()->json([
+        $response_data = [
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
+        ];
+
+        if ($with_user) {
+            $response_data['user'] = auth()->user();
+        }
+
+        return response()->json($response_data);
     }
 }
