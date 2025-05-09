@@ -8,6 +8,8 @@ use Validator;
 
 class AuthController extends Controller
 {
+    // TODO: implements DDD
+
     /**
      * Register a User.
      *
